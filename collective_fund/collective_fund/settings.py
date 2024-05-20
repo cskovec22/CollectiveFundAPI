@@ -1,5 +1,6 @@
 from pathlib import Path
 
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = "django-insecure-+k*9nujq0h9js0l8hreh&&4i-pl-_l7gh97u$%e#=oe41o+s^t"
@@ -16,8 +17,11 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
+    "rest_framework.authtoken",
+    "djoser",
+    "drf_spectacular",
     "api.apps.ApiConfig",
-    "funds_collection.apps.FundsCollectionConfig"
+    "funds_collection.apps.FundsCollectionConfig",
     "users.apps.UsersConfig",
 ]
 
@@ -36,7 +40,7 @@ ROOT_URLCONF = "collective_fund.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [BASE_DIR / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -58,6 +62,8 @@ DATABASES = {
     }
 }
 
+AUTH_USER_MODEL = "users.CustomUser"
+
 AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
@@ -73,11 +79,13 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-LANGUAGE_CODE = "ru"
+LANGUAGE_CODE = "ru-ru"
 
 TIME_ZONE = "UTC"
 
 USE_I18N = True
+
+USE_L18N = True
 
 USE_TZ = True
 
@@ -88,3 +96,37 @@ MEDIA_URL = "media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+REST_FRAMEWORK = {
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.AllowAny",
+    ],
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework.authentication.TokenAuthentication",
+    ),
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+}
+
+DJOSER = {
+    "SERIALIZERS": {
+         "user_create": "api.serializers.UserRegistrationSerializer"
+    }
+}
+
+# CACHES = {
+#     "default": {
+#         "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+#         # "LOCATION": "cachel"
+#     }
+# }
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "API для групповых денежных сборов",
+    "DESCRIPTION": "Веб-сервис на базе Django, предоставляющий "
+                   "CRUD REST API для групповых денежных сборов",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
+}
+
+# EMAIL_BACKEND = "django.core.mail.backends.locmem.EmailBackend"
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
