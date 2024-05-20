@@ -1,13 +1,18 @@
+import os
 from pathlib import Path
 
+from dotenv import load_dotenv
+
+
+load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = "django-insecure-+k*9nujq0h9js0l8hreh&&4i-pl-_l7gh97u$%e#=oe41o+s^t"
+SECRET_KEY = os.getenv("SECRET_KEY", "SECRET_KEY")
 
-DEBUG = True
+DEBUG = os.getenv("DEBUG", "False") == "True"
 
-ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost").split()
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -54,6 +59,20 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "collective_fund.wsgi.application"
+
+# DATABASES = {
+#     "default": {
+#         "ENGINE": os.getenv(
+#             "POSTGRES_ENGINE",
+#             "django.db.backends.postgresql"
+#         ),
+#         "NAME": os.getenv("POSTGRES_DB", "postgres"),
+#         "USER": os.getenv("POSTGRES_USER", "postgres"),
+#         "PASSWORD": os.getenv("POSTGRES_PASSWORD", "postgres"),
+#         "HOST": os.getenv("DB_HOST", "db"),
+#         "PORT": os.getenv("DB_PORT", 5432)
+#     }
+# }
 
 DATABASES = {
     "default": {
