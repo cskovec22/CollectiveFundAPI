@@ -62,6 +62,16 @@ python manage.py makemigrations
 python manage.py migrate
 ```
 
+- Соберите статику:
+```
+python manage.py collectstatic
+```
+
+- Заполните базу данных командой:
+```
+python manage.py importdata
+```
+
 - Создайте суперпользователя:
 ```
 python manage.py createsuperuser

@@ -1,4 +1,4 @@
-from django.contrib.admin import ModelAdmin, register, TabularInline
+from django.contrib.admin import ModelAdmin, register
 
 from .models import Collect, Payment
 
@@ -6,11 +6,8 @@ from .models import Collect, Payment
 @register(Payment)
 class PaymentAdmin(ModelAdmin):
     """Административный класс для модели платежа."""
-    list_display = ["author", "donation_sum", "donation_date"]
-    readonly_fields = ["author", "donation_date"]
-
-# class PaymentsInline(TabularInline):
-#     model = Payment
+    list_display = ["author", "collect", "donation_sum", "donation_date"]
+    readonly_fields = ["author", "collect", "donation_date"]
 
 
 @register(Collect)
@@ -27,5 +24,3 @@ class CollectAdmin(ModelAdmin):
         "finish_date"
     ]
     readonly_fields = ["author", "current_sum", "people_amount"]
-    # inlines = [PaymentsInline]
-

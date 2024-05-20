@@ -1,22 +1,15 @@
-from rest_framework.response import Response
 from rest_framework import permissions, status, viewsets
+from rest_framework.response import Response
 
 from funds_collection.models import Collect, Payment
 from .permissions import IsOwnerOrReadOnly
-from .serializers import (CreatePaymentSerializer, PaymentSerializer, CreateCollectSerializer, CollectSerializer)
-# from django.views.decorators.cache import cache_page
-# from django.core.cache import cache
-# from django.utils import timezone
+from .serializers import (CollectSerializer, CreateCollectSerializer,
+                          CreatePaymentSerializer, PaymentSerializer)
 
 
 class CollectViewSet(viewsets.ModelViewSet):
     """Вьюсет для денежного сбора."""
-    # queryset = cache.get_or_404(
-        # f"collect_cache",
-        # Collect.objects.all(),
-        # timeout=60 * 10
-    # )
-    queryset = Collect.objects.all()
+    queryset = Collect.objects.select_related("author")
     http_method_names = ("get", "post", "patch", "delete")
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
@@ -31,11 +24,6 @@ class CollectViewSet(viewsets.ModelViewSet):
         if self.request.method in ("PATCH", "DELETE"):
             return (IsOwnerOrReadOnly(),)
         return super().get_permissions()
-
-    # @cache_page(60 * 10)
-    # def list(self, request, *args, **kwargs):
-    #     """Обеспечить кэширование данных на 10 минут."""
-    #     return super().list(request, *args, **kwargs)
 
 
 class PaymentViewSet(viewsets.ModelViewSet):
@@ -60,4 +48,3 @@ class PaymentViewSet(viewsets.ModelViewSet):
         fund.save()
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
-

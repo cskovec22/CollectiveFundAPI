@@ -21,11 +21,4 @@ class CustomUser(AbstractUser):
     def get_full_name(self):
         """Получить ФИО пользователя."""
         full_name = f"{self.last_name} {self.first_name} {self.patronymic}"
-        # return full_name.strip() if full_name else self.username
         return full_name.strip()
-
-    # def save(self):
-    #     user = super(CustomUser, self)
-    #     user.set_password(self.password)
-    #     user.save()
-    #     return user

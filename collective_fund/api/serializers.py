@@ -1,11 +1,11 @@
-from rest_framework import serializers
-
-from users.models import CustomUser
-from funds_collection.models import Collect, Payment
 import base64
 
 from django.core.files.base import ContentFile
 from django.core.mail import send_mail
+from funds_collection.models import Collect, Payment
+from rest_framework import serializers
+
+from users.models import CustomUser
 
 
 class Base64ImageField(serializers.ImageField):
@@ -136,7 +136,6 @@ class ListPaymentSerializer(PaymentSerializer):
 
 class CreateCollectSerializer(serializers.ModelSerializer):
     """Сериализатор для создания денежного сбора."""
-    # image = serializers.ImageField()
     author = serializers.SlugRelatedField(
         slug_field="username",
         read_only=True
