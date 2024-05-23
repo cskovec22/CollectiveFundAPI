@@ -4,8 +4,8 @@ from django.db import models
 from users.models import CustomUser
 
 
-MIN_COLLECTION_SUM = 1
-MIN_DONATION_SUM = 1
+MIN_COLLECTION_SUM = 1.0
+MIN_DONATION_SUM = 1.0
 
 
 class Payment(models.Model):
@@ -22,8 +22,10 @@ class Payment(models.Model):
         related_name="payments",
         verbose_name="Денежный сбор"
     )
-    donation_sum = models.PositiveSmallIntegerField(
+    donation_sum = models.DecimalField(
         "Сумма пожертвования",
+        max_digits=8,
+        decimal_places=2,
         validators=[
             MinValueValidator(MIN_DONATION_SUM)
         ]
@@ -37,11 +39,12 @@ class Payment(models.Model):
         """Конфигурация модели категории."""
         verbose_name = "платеж"
         verbose_name_plural = "Платежи"
-        ordering = ("id",)
+        ordering = ("collect", "-donation_date")
 
     def __str__(self):
         """Строковое представление объекта категории."""
-        return (f"{self.donation_date} пользователь {self.author} "
+        return (f"{self.donation_date.strftime('%d %B %Y в %H:%M')} "
+                f"пользователь {self.author} "
                 f"пожертвовал {self.donation_sum} рублей")
 
 
@@ -68,21 +71,15 @@ class Collect(models.Model):
         choices=REASONS_CHOICES
     )
     description = models.TextField("Описание")
-    target_sum = models.PositiveSmallIntegerField(
+    target_sum = models.DecimalField(
         "Сумма сбора",
+        max_digits=8,
+        decimal_places=2,
         validators=[
             MinValueValidator(MIN_COLLECTION_SUM)
         ],
         null=True,
         blank=True
-    )
-    current_sum = models.PositiveSmallIntegerField(
-        "Текущая сумма сбора",
-        default=0,
-    )
-    people_amount = models.PositiveSmallIntegerField(
-        "Количество пожертвовавших людей",
-        default=0,
     )
     image = models.ImageField(
         "Обложка сбора",

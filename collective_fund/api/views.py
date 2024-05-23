@@ -1,17 +1,34 @@
-from rest_framework import permissions, status, viewsets
-from rest_framework.response import Response
+from django.db.models import Sum, Count
+from rest_framework import permissions, viewsets
 
 from funds_collection.models import Collect, Payment
 from .permissions import IsOwnerOrReadOnly
-from .serializers import (CollectSerializer, CreateCollectSerializer,
-                          CreatePaymentSerializer, PaymentSerializer)
+from .serializers import (
+    CollectSerializer,
+    CreateCollectSerializer,
+    CreatePaymentSerializer,
+    PaymentSerializer
+)
 
 
 class CollectViewSet(viewsets.ModelViewSet):
     """Вьюсет для денежного сбора."""
-    queryset = Collect.objects.select_related("author")
+    queryset = Collect.objects.all()
     http_method_names = ("get", "post", "patch", "delete")
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+
+    def get_queryset(self):
+        """Получить queryset."""
+        queryset = super().get_queryset()
+        queryset = queryset.select_related(
+            "author"
+        ).prefetch_related(
+            "payments", "payments__author"
+        ).annotate(
+            people_amount=Count("payments__author", distinct=True),
+            current_sum=Sum("payments__donation_sum", default=0)
+        )
+        return queryset
 
     def get_serializer_class(self):
         """Получить класс сериализатора."""
@@ -25,12 +42,24 @@ class CollectViewSet(viewsets.ModelViewSet):
             return (IsOwnerOrReadOnly(),)
         return super().get_permissions()
 
+    def perform_create(self, serializer):
+        """Добавить автора перед созданием денежного сбора."""
+        serializer.save(author=self.request.user)
+
 
 class PaymentViewSet(viewsets.ModelViewSet):
     """Вьюсет для платежа."""
     queryset = Payment.objects.all()
     http_method_names = ("get", "post")
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+
+    def get_queryset(self):
+        """Получить queryset."""
+        queryset = super().get_queryset()
+        queryset = queryset.select_related(
+            "author"
+        ).prefetch_related("collect")
+        return queryset
 
     def get_serializer_class(self):
         """Получить класс сериализатора."""
@@ -40,11 +69,4 @@ class PaymentViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         """Обновить денежный сбор при создании платежа."""
-        payment = serializer.save()
-
-        fund = payment.collect
-        fund.current_sum += payment.donation_sum
-        fund.people_amount += 1
-        fund.save()
-
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        serializer.save(author=self.request.user)

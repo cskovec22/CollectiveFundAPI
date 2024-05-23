@@ -19,8 +19,8 @@ class CollectAdmin(ModelAdmin):
         "title",
         "reason",
         "target_sum",
-        "current_sum",
-        "people_amount",
+        # "current_sum",
+        # "people_amount",
         "finish_date"
     ]
-    readonly_fields = ["author", "current_sum", "people_amount"]
+    # readonly_fields = ["author", "current_sum", "people_amount"]

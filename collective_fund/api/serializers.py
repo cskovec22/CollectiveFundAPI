@@ -59,25 +59,25 @@ class CreatePaymentSerializer(serializers.ModelSerializer):
         fields = ["author", "collect", "donation_sum"]
         read_only_fields = ["author", "donation_date"]
 
-    def create(self, validated_data):
-        """Вставить текущего пользователя в авторы платежа."""
-        user = self.context["request"].user
-        payment = Payment.objects.create(
-            author=user,
-            **validated_data
-        )
-
-        send_mail(
-            subject="Успешная отправка платежа",
-            message=f"Ваш платеж {validated_data['donation_sum']} рублей "
-                    "успешно отправлен на групповой сбор "
-                    f"{validated_data['collect'].title}!",
-            from_email="fundm@team.ru",
-            recipient_list=[f"{user.email}"],
-            fail_silently=True,
-        )
-
-        return payment
+    # def create(self, validated_data):
+    #     """Вставить текущего пользователя в авторы платежа."""
+    #     user = self.context["request"].user
+    #     payment = Payment.objects.create(
+    #         author=user,
+    #         **validated_data
+    #     )
+    #
+    #     send_mail(
+    #         subject="Успешная отправка платежа",
+    #         message=f"Ваш платеж {validated_data['donation_sum']} рублей "
+    #                 "успешно отправлен на групповой сбор "
+    #                 f"{validated_data['collect'].title}!",
+    #         from_email="fundm@team.ru",
+    #         recipient_list=[f"{user.email}"],
+    #         fail_silently=True,
+    #     )
+    #
+        # return payment
 
     def to_representation(self, instance):
         """Представление платежа."""
@@ -138,7 +138,8 @@ class CreateCollectSerializer(serializers.ModelSerializer):
     """Сериализатор для создания денежного сбора."""
     author = serializers.SlugRelatedField(
         slug_field="username",
-        read_only=True
+        read_only=True,
+        default=serializers.CurrentUserDefault()
     )
     image = Base64ImageField()
     reason = serializers.ChoiceField(choices=Collect.REASONS_CHOICES)
@@ -157,23 +158,23 @@ class CreateCollectSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ["author"]
 
-    def create(self, validated_data):
-        """Вставить текущего пользователя в авторы сбора."""
-        user = self.context["request"].user
-        collect = Collect.objects.create(
-            author=user,
-            **validated_data
-        )
-
-        send_mail(
-            subject="Успешное создание сбора",
-            message=f"Ваш сбор {validated_data['title']} успешно создан!",
-            from_email="fundm@team.ru",
-            recipient_list=[f"{user.email}"],
-            fail_silently=True,
-        )
-
-        return collect
+    # def create(self, validated_data):
+    #     """Вставить текущего пользователя в авторы сбора."""
+    #     user = self.context["request"].user
+    #     collect = Collect.objects.create(
+    #         author=user,
+    #         **validated_data
+    #     )
+    #
+    #     send_mail(
+    #         subject="Успешное создание сбора",
+    #         message=f"Ваш сбор {validated_data['title']} успешно создан!",
+    #         from_email="fundm@team.ru",
+    #         recipient_list=[f"{user.email}"],
+    #         fail_silently=True,
+    #     )
+    #
+        # return collect
 
 
 class CollectSerializer(serializers.ModelSerializer):
@@ -182,8 +183,8 @@ class CollectSerializer(serializers.ModelSerializer):
         slug_field="username",
         read_only=True
     )
-    # current_sum = serializers.SerializerMethodField()
-    # people_amount = serializers.SerializerMethodField()
+    current_sum = serializers.DecimalField(max_digits=8, decimal_places=2)
+    people_amount = serializers.IntegerField()
     payment_list = serializers.SerializerMethodField()
     finish_date = serializers.SerializerMethodField()
 
@@ -203,19 +204,6 @@ class CollectSerializer(serializers.ModelSerializer):
             "payment_list"
         ]
         read_only_fields = ["author"]
-
-    # @staticmethod
-    # def get_people_amount(obj):
-    #     """Получить количество пожертвовавших людей."""
-    #     return obj.payments.count()
-
-    # @staticmethod
-    # def get_current_sum(obj):
-    #     """Получить текущую сумму сбора."""
-    #     current_sum = Payment.objects.filter(collect=obj).aggregate(
-    #         current_sum=Sum("donation_sum")
-    #     )["current_sum"]
-    #     return current_sum if current_sum else 0
 
     @staticmethod
     def get_payment_list(collect):
