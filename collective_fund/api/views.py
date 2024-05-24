@@ -1,14 +1,14 @@
 from django.db.models import Sum, Count
 from rest_framework import permissions, viewsets
 
-from funds_collection.models import Collect, Payment
-from .permissions import IsOwnerOrReadOnly
-from .serializers import (
+from api.permissions import IsOwnerOrReadOnly
+from api.serializers import (
     CollectSerializer,
     CreateCollectSerializer,
     CreatePaymentSerializer,
     PaymentSerializer
 )
+from funds_collection.models import Collect, Payment
 
 
 class CollectViewSet(viewsets.ModelViewSet):
